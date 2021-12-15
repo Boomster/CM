@@ -36,8 +36,7 @@ public class MyMatrix {
             }
             nField.add(row);
         }
-        MyMatrix c = new MyMatrix(nField);
-        return c;
+        return new MyMatrix(nField);
     }
 
     public static MyMatrix Mult(MyMatrix a, MyMatrix b) {
@@ -51,7 +50,7 @@ public class MyMatrix {
         for (int i = 0; i < n; i++) {
             List<Double> row = new ArrayList<>();
             for (int j = 0; j < m2; j++) {
-                Double sum = 0.;
+                double sum = 0.;
                 for (int k = 0; k < m; k++) {
                     sum += a.field.get(i).get(k) * b.field.get(k).get(j);
                 }
@@ -76,13 +75,12 @@ public class MyMatrix {
             }
             tField.add(row);
         }
-        MyMatrix tMatrix = new MyMatrix(tField);
-        return tMatrix;
+        return new MyMatrix(tField);
     }
 
     public static Double det(MyMatrix matrix){
         if(matrix.field.size() > 1){
-            Double sum = 0.;
+            double sum = 0.;
             for(int i = 0; i < matrix.field.size(); i++){
                 MyMatrix smallMatrix = new MyMatrix();
                 for (int j = 1; j < matrix.field.size(); j++) {
@@ -174,6 +172,64 @@ public class MyMatrix {
         return lines;
     }
 
+    public Double CondSquare(){
+        double maxLine = 0.;
+        for (int i = 0; i < this.field.size(); i++) {
+            double curLine = 0.;
+            for (int j = 0; j < this.field.size(); j++) {
+                curLine += Math.abs(this.field.get(i).get(j));
+            }
+            if(curLine > maxLine){
+                maxLine = curLine;
+            }
+        }
+        return maxLine;
+    }
+
+    public Double CondOcta(){
+        double maxLine = 0.;
+        for (int i = 0; i < this.field.size(); i++) {
+            double curLine = 0.;
+            for (int j = 0; j < this.field.size(); j++) {
+                curLine += Math.abs(this.field.get(j).get(i));
+            }
+            if(curLine > maxLine){
+                maxLine = curLine;
+            }
+        }
+        return maxLine;
+    }
+
+    public Double CondEuclid(){
+        double res = 0.;
+        MyMatrix matrix = MyMatrix.Mult(this.T(), this);
+        for (int i = 0; i < matrix.field.size()-1; i++) {
+            for (int j = i+1; j < matrix.field.size(); j++) {
+                MyMatrix T = new MyMatrix(matrix.field.size());
+                for (int k = 0; k < T.field.size(); k++) {
+                    T.field.get(k).set(k, 1.);
+                }
+                double c , s;
+                double a = 0.5*Math.atan(2* matrix.field.get(i).get(j)/(matrix.field.get(i).get(i)-matrix.field.get(j).get(j)));
+                c = Math.cos(a);
+                s = Math.sin(a);
+
+                T.field.get(i).set(i, c);
+                T.field.get(j).set(j, c);
+                T.field.get(j).set(i, s);
+                T.field.get(i).set(j, -s);
+                matrix = MyMatrix.Mult(MyMatrix.Mult(T.T(), matrix), T);
+            }
+        }
+        for (int i = 0; i < matrix.field.size(); i++) {
+            if(res < Math.abs(matrix.field.get(i).get(i))) {
+                res = Math.abs(matrix.field.get(i).get(i));
+            }
+        }
+        res = Math.sqrt(res);
+        return res;
+    }
+
     public static MyMatrix Copy(MyMatrix matrix){
         List<List<Double>> newField = new ArrayList<>();
         for (int i = 0; i < matrix.field.size(); i++) {
@@ -183,7 +239,6 @@ public class MyMatrix {
             }
             newField.add(line);
         }
-        MyMatrix newMatrix = new MyMatrix(newField);
-        return newMatrix;
+        return new MyMatrix(newField);
     }
 }

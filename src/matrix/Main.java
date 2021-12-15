@@ -36,7 +36,9 @@ public class Main {
 
         for (int i = 0; i < taskMatrix.field.size(); i++) {
             List<Double>  rootLine = new ArrayList<>();
-            rootLine.add(i+1.);
+            int tmp = i+1;
+            Double tmpd = (double) tmp;
+            rootLine.add(tmpd);
             rootXArray.add(rootLine);
         }
 
@@ -157,9 +159,10 @@ public class Main {
             }
 
         }
-        x.field.add(new ArrayList<>());
         for (int i = 0; i < U.field.size(); i++) {
-            x.field.get(0).add(tmpX[i]);
+            List<Double> line = new ArrayList<>();
+            line.add(tmpX[i]);
+            x.field.add(line);
         }
 
         PrintLine("x", fileName);
@@ -180,7 +183,30 @@ public class Main {
         PrintMatrix(minusA, fileName);
         PrintLine("A*A^-1", fileName);
         PrintMatrixPrecision(MyMatrix.Mult(newA, minusA), fileName);
+        PrintLine("Condition numbers", fileName);
+        MyMatrix taskMinusA = taskMatrix.MinusOnePower();
+        PrintLine(String.format("Norm 1:%9.5f", (taskMatrix.CondSquare()*taskMinusA.CondSquare())),fileName);
+        PrintLine(String.format("Norm 2:%9.5f", (taskMatrix.CondOcta()*taskMinusA.CondOcta())),fileName);
+        PrintLine(String.format("Norm 3:%9.5f", (taskMatrix.CondEuclid()*taskMinusA.CondEuclid())),fileName);
 
+        PrintLine("Ax-b", fileName);
+        MyMatrix Ax = MyMatrix.Mult(taskMatrix, x);
+        MyMatrix Axminusb = new MyMatrix();
+        for (int i = 0; i < Ax.field.size(); i++) {
+            List<Double> line = new ArrayList<>();
+            line.add(Ax.field.get(i).get(0)-b.field.get(i).get(0));
+            Axminusb.field.add(line);
+        }
+        PrintMatrixPrecision(Axminusb, fileName);
+
+        PrintLine("Error", fileName);
+        MyMatrix error = new MyMatrix();
+        for (int i = 0; i < x.field.size(); i++) {
+            List<Double> line = new ArrayList<>();
+            line.add(rootX.field.get(i).get(0)-x.field.get(i).get(0));
+            error.field.add(line);
+        }
+        PrintMatrixPrecision(error, fileName);
     }
 
     public static void PrintMatrixPrecision(MyMatrix matrix, String fileName){
